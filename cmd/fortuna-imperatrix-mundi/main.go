@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/brankomiric/fortuna-imperatrix-mundi/internal/database"
 	"github.com/brankomiric/fortuna-imperatrix-mundi/internal/server"
 	"github.com/subosito/gotenv"
 )
@@ -28,7 +29,18 @@ func main() {
 		port = "3000"
 	}
 
-	app := server.SetupRouter()
+	connParams, err := database.ReadConnectionStringParams()
+	if err != nil {
+		log.Fatalf("DB initialization error: %s", err.Error())
+	}
+
+	connectionStr := database.CreateConnectionString(connParams.Host, connParams.Port, connParams.User, connParams.Password, connParams.DBName)
+	db, err := database.Initialize(connectionStr)
+	if err != nil {
+		log.Fatalf("DB initialization error: %s", err.Error())
+	}
+
+	app := server.SetupRouter(db)
 
 	go func() {
 		log.Fatal(app.Listen(port))
@@ -45,7 +57,7 @@ func main() {
 
 	log.Println("Shutting down service")
 
-	err := app.ShutdownWithContext(stopCtx)
+	err = app.ShutdownWithContext(stopCtx)
 	if err != nil {
 		log.Printf("app.ShutdownWithContext() error: %s\n", err.Error())
 	}
