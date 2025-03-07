@@ -52,3 +52,53 @@ func (dbObj *Database) AddTournament(input dto.CreateTournament) (*int64, error)
 	}
 	return &lastInsertID, nil
 }
+
+func (dbObj *Database) PlaceBet(input dto.Bet) error {
+	tx, err := dbObj.DB.Beginx()
+	if err != nil {
+		return err
+	}
+
+	// Deduct the amount from the player's account balance
+	updateBalanceQuery := "UPDATE players SET account_balance = account_balance - ? WHERE player_id = ? AND account_balance >= ?"
+	updateBalanceResult, err := tx.Exec(updateBalanceQuery, input.Amount, input.PlayerID, input.Amount)
+	if err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			return rollbackErr
+		}
+		return err
+	}
+
+	rowsAffected, err := updateBalanceResult.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("player does not have enough balance")
+	}
+
+	// Create the bet
+	betQuery := "INSERT INTO bets (player_id, tournament_id, amount) VALUES (?, ?, ?)"
+	_, err = tx.Exec(betQuery, input.PlayerID, input.TournamentID, input.Amount)
+	if err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			return rollbackErr
+		}
+		return err
+	}
+
+	// Update the tournament prize pool
+	updateTournamentPrizePoolQuery := "UPDATE tournaments SET prize_pool = prize_pool + ? WHERE tournament_id = ?"
+	_, err = tx.Exec(updateTournamentPrizePoolQuery, input.Amount, input.TournamentID)
+	if err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			return rollbackErr
+		}
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+	return nil
+}
