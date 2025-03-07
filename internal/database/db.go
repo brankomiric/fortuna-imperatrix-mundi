@@ -102,3 +102,22 @@ func (dbObj *Database) PlaceBet(input dto.Bet) error {
 	}
 	return nil
 }
+
+func (dbObj *Database) InvokeDistributePrizesProcedure(tournamentID int) error {
+	isOngoingTournamentQuery := "SELECT IF(NOW() >= start_date AND NOW() <= end_date, TRUE, FALSE) AS is_ongoing FROM tournaments WHERE tournament_id = ?"
+	var isOngoing bool
+	err := dbObj.DB.Get(&isOngoing, isOngoingTournamentQuery, tournamentID)
+
+	if err != nil {
+		return err
+	}
+	if isOngoing {
+		return fmt.Errorf("tournament is still ongoing")
+	}
+	_, err = dbObj.DB.Exec("CALL DistributePrizes(?)", tournamentID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

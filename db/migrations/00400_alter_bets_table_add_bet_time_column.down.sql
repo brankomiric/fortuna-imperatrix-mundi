@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE bets DROP COLUMN bet_time;
+
+COMMIT;

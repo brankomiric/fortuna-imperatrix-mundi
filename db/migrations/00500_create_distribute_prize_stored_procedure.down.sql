@@ -1,0 +1,5 @@
+BEGIN;
+
+DROP PROCEDURE IF EXISTS DistributePrizes;
+
+COMMIT;

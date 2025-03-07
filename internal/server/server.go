@@ -17,5 +17,7 @@ func SetupRouter(db *database.Database) *fiber.App {
 
 	app.Post("/players/bet", h.PlaceBet)
 
+	app.Post("/tournaments/prizes/distribute/:tournament_id", h.DistributePrizes)
+
 	return app
 }
