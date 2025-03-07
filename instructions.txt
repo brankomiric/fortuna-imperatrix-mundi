@@ -1,0 +1,91 @@
+Task
+
+Set up and optimize a simple iGaming platforms database and its connectors
+
+Description
+
+Create a concise database for an iGaming platform including the application layer scripts to route endpoint calls to respective procedures.
+
+The platform needs to manage the players, host tournaments, and distribute prizes. Tournaments are competitions where the players betting the most are ranked highest.
+
+Requirements
+
+*
+
+App layer:
+
+Simple application (language of your choice)
+
+*
+
+Implement endpoint to trigger the distribute prize stored procedure
+
+*
+
+Implement endpoint that returns the ranking list
+
+*
+
+MySQL DB:
+
+Create the necessary tables, write the stored procedure for prize distribution, implement CTE or window Functions to produce a ranking report.
+
+Implementation details
+
+When creating the tables please ensure that your implementation contains the following mandatory tables and procedures:
+
+*
+
+[players]  - columns for: player id, player name, player email, account balance
+
+*
+
+[tournaments] – columns: tournament id, tournament name, prize pool, start date, end date
+
+*
+
+Create a Stored procedure for distributing the prizes based on player placement and tournament prize pool: 1 place 50%, 2 place 30%, 3 place 20%;
+
+*
+
+Use CTE or Window Function Query to generate a report that ranks the players based on their account balance in descending order. So we have the highest earnings at the top.
+
+Deliverables
+
+Share a GitHub or GitLab repo that contains the following:
+
+*
+
+SQL scripts for creating the tables, the stored procedure and the ranking query
+
+*
+
+App code
+
+*
+
+A brief readme file explaining how to run the scripts and DB scripts and what each script does.
+
+*
+
+What did you learn and if you encountered any challenges, how did you overcome them?
+
+*
+
+What did you take in consideration to ensure the query and or stored procedure is efficient and handles edge cases?
+
+*
+
+CTEs and Window function:
+
+*
+
+If you used CTEs or Window Functions, what did you learn about their power and flexibility?
+
+*
+
+How might you apply the technique in more complex scenarios,
+
+*
+
+Optimization: How did you optimize the queries and stored procedures.
