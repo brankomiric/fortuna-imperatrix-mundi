@@ -1,21 +1,52 @@
 package main
 
 import (
-    "log"
+	"context"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-    "github.com/gofiber/fiber/v3"
+	"github.com/brankomiric/fortuna-imperatrix-mundi/internal/server"
+	"github.com/subosito/gotenv"
 )
 
+func init() {
+	err := gotenv.Load()
+	if err != nil {
+		log.Printf("gotenv.Load() error: %s\n", err.Error())
+	}
+}
+
 func main() {
-    // Initialize a new Fiber app
-    app := fiber.New()
+	log.Println("Starting service...")
 
-    // Define a route for the GET method on the root path '/'
-    app.Get("/", func(c fiber.Ctx) error {
-        // Send a string response to the client
-        return c.SendString("Hello, World 👋!")
-    })
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Println("PORT is not set. Using default port 3000.")
+		port = "3000"
+	}
 
-    // Start the server on port 3000
-    log.Fatal(app.Listen(":3000"))
+	app := server.SetupRouter()
+
+	go func() {
+		log.Fatal(app.Listen(port))
+	}()
+
+	// Graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT, os.Interrupt)
+
+	<-stop
+
+	stopCtx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	log.Println("Shutting down service")
+
+	err := app.ShutdownWithContext(stopCtx)
+	if err != nil {
+		log.Printf("app.ShutdownWithContext() error: %s\n", err.Error())
+	}
 }
