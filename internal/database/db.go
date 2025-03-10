@@ -121,3 +121,13 @@ func (dbObj *Database) InvokeDistributePrizesProcedure(tournamentID int) error {
 
 	return nil
 }
+
+func (dbObj *Database) GetPlayersRankedByBalance() ([]Player, error) {
+	query := "WITH top_to_bottom_players AS (SELECT * FROM players order by account_balance DESC) SELECT * FROM top_to_bottom_players"
+	var players []Player
+	err := dbObj.DB.Select(&players, query)
+	if err != nil {
+		return nil, err
+	}
+	return players, nil
+}

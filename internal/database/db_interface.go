@@ -7,4 +7,5 @@ type AbstractDB interface {
 	AddTournament(input dto.CreateTournament) (*int64, error)
 	PlaceBet(input dto.Bet) error
 	InvokeDistributePrizesProcedure(tournamentID int) error
+	GetPlayersRankedByBalance() ([]Player, error)
 }

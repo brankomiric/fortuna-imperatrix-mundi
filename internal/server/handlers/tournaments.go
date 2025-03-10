@@ -62,3 +62,12 @@ func (h *Handler) DistributePrizes(c fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(Response{Message: "Prizes distributed"})
 }
+
+func (h *Handler) RankedPlayers(c fiber.Ctx) error {
+	players, err := h.DB.GetPlayersRankedByBalance()
+	if err != nil {
+		errResp := Response{Message: err.Error()}
+		return c.Status(http.StatusInternalServerError).JSON(errResp)
+	}
+	return c.Status(http.StatusOK).JSON(players)
+}
